@@ -51,6 +51,8 @@ ALGORITHMS = [
     'Transfer',
     'CausIRL_CORAL',
     'CausIRL_MMD',
+    'FineTuning',
+    'LPFT'
 ]
 
 def get_algorithm_class(algorithm_name):
@@ -1987,3 +1989,105 @@ class CausIRL_CORAL(AbstractCausIRL):
     def __init__(self, input_shape, num_classes, num_domains, hparams):
         super(CausIRL_CORAL, self).__init__(input_shape, num_classes, num_domains,
                                   hparams, gaussian=False)
+
+# Implemented by Matheart
+class FineTuning(Algorithm):
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(FineTuning, self).__init__(input_shape, num_classes, num_domains, hparams)
+        
+        # Load pre-trained ResNet-50
+        self.model = networks.ResNet(input_shape = input_shape, hparams = hparams)
+
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(),
+            lr = self.hparams["lr"],
+            weight_decay = self.hparams["weight_decay"]
+        )    
+
+    def predict(self, x):
+        return self.model(x)
+    
+    def update(self, minibatches, unlabeled=None):
+        self.model.train()
+        for x, y in minibatches:
+            self.optimizer.zero_grad()
+            output = self.predict(x)
+            loss = F.cross_entropy(output, y)
+            loss.backward()
+            self.optimizer.step()
+        return {'loss': loss.item()}
+
+class LPFT(Algorithm):
+    def __init__(self, input_shape, num_classes, num_domains, hparams):
+        super(LPFT, self).__init__(input_shape, num_classes, num_domains, hparams)
+
+        # Load pre-trained ResNet-50
+        self.model = networks.ResNet(input_shape = input_shape, hparams = hparams)
+
+        # Linear probing:
+        # Freeze all layers except the penultimate layer
+
+        # The reason why we choose the fourth layer as the penultimate layer, 
+        # is because in the original ResNet paper, 
+        # it was stated that this layer represents high-level features, 
+        # which are more general and abstract, and thus better suited for domain adaptation than lower-level features.
+        # Example papers:
+        # "Deep Adaptation Networks for Unsupervised Domain Adaptation"
+        # "Unsupervised Domain Adaptation by Backpropagation"
+
+        for param in self.model.parameters():
+            param.requires_grad = False
+        for param in self.model.layer4.parameters():
+            param.requires_grad = True
+        # we need the gradient to flow through it
+        # self.model.fc.requires_grad = True
+
+        # Logistic regression classifier on frozen feayires
+        self.classifier = nn.Linear(self.model.fc.in_features, num_classes)
+        # where is the argmax ?
+        self.model.fc = self.classifier 
+        self.model.fc.requires_grad = True # such that it can be fine tuned
+
+        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = torch.optim.Adam(
+            self.classifier.parameters(),
+            lr = self.hparams["lr"],
+            weight_decay = self.hparams["weight_decay"]
+        )
+    
+    def predict(self, x):
+        with torch.no_grad():
+            logit = self.model(x)
+            output = self.classifier(logit)
+            return output
+    
+    def update(self, minibatches, unlabeled=None):
+        self.model.train()
+        for x, y in minibatches:
+            self.optimizer.zero_grad()
+            logit = self.forward(x)
+            output = self.classifier(logit)
+            loss = self.loss_fn(output, y)
+            loss.backward()
+            self.optimizer.step()
+        return {'loss': loss.item()}
+
+    def fine_tune(self, data_loader, id_domain):
+        # Accuracies of different learning rate
+        best_acc = 0
+        best_lr = 0
+        lrs = [0.5, 0.1, 0.05, 0.01, 0.005, 0.001]
+        accuracy = []
+        for lr in lrs:
+            self.optimizer = torch.optim.Adam(self.classifier.parameters(), lr=lr)
+            scheduler = CosineAnnealingLR(self.optimizer, T_max=len(data_loader))
+            for epoch in range(self.hparams.num_epochs):
+                scheduler.step()
+                train_loss, train_acc = self.train(data_loader, id_domain)
+                accuracy.append(train_acc)
+            avg_acc = sum(accuracy) / len(accuracy)
+            if avg_acc > best_acc:
+                best_acc = avg_acc
+                best_lr = lr
+        self.optimizer = torch.optim.Adam(self.classifier.parameters(), lr=best_lr)
+        return self.test(data_loader, id_domain)
