@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 78, in <module>
+    hparams = hparams_registry.random_hparams(args.algorithm, args.dataset,
+  File "/home/Matheart/Code/DomainBed/domainbed/hparams_registry.py", line 190, in random_hparams
+    return {a: c for a, (b, c) in _hparams(algorithm, dataset, seed).items()}
+  File "/home/Matheart/Code/DomainBed/domainbed/hparams_registry.py", line 151, in _hparams
+    _hparam('lr', 5e-5, lambda r: 10**r.uniform(-5, -3.5))
+  File "/home/Matheart/Code/DomainBed/domainbed/hparams_registry.py", line 22, in _hparam
+    assert(name not in hparams)
+AssertionError

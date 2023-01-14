@@ -1997,12 +1997,22 @@ class FineTuning(Algorithm):
         
         # Load pre-trained ResNet-50
         self.model = networks.ResNet(input_shape = input_shape, hparams = hparams)
+        self.classifier = nn.Linear(self.model.n_outputs, num_classes)
+        torch.nn.init.xavier_uniform(self.classifier.weight)
+
+        self.model.network.fc = self.classifier 
 
         self.optimizer = torch.optim.Adam(
             self.model.parameters(),
-            lr = self.hparams["lr"],
+            lr = self.hparams["lr_d"],
             weight_decay = self.hparams["weight_decay"]
         )    
+
+        # Define the CosineAnnealingLR scheduler
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = hparams["T_max"])
+
+        # Early stopping
+        #self.early_stopping = EarlyStopping(patience=hparams["early_stopping_patience"], metric='val_loss')
 
     def predict(self, x):
         return self.model(x)
@@ -2015,6 +2025,11 @@ class FineTuning(Algorithm):
             loss = F.cross_entropy(output, y)
             loss.backward()
             self.optimizer.step()
+            self.scheduler.step()
+            #self.early_stopping(loss, self.model)
+            #if self.early_stopping.early_stop:
+            #    print("Early stopping")
+            #    break
         return {'loss': loss.item()}
 
 class LPFT(Algorithm):
@@ -2051,7 +2066,7 @@ class LPFT(Algorithm):
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(
             self.classifier.parameters(),
-            lr = self.hparams["lr"],
+            lr = self.hparams["lr_d"],
             weight_decay = self.hparams["weight_decay"]
         )
     

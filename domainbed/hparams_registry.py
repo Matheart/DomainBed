@@ -136,6 +136,11 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('beta1', 0.5, lambda r: r.choice([0., 0.5]))
         _hparam('lr_d', 1e-3, lambda r: 10**r.uniform(-4.5, -2.5))
 
+    elif algorithm == "FineTuning" or algorithm == "LPFT":
+        _hparam('early_stopping_patience', 5, lambda r: r.choice([5, 10, 15, 20, 25]))
+        _hparam('T_max', 20, lambda r: r.choice([10, 20]))
+        _hparam('lr_d', 0.0001, lambda r: r.choice([0.0001, 0.0003, 0.001, 0.01, 0.03, 0.1]))
+
 
     # Dataset-and-algorithm-specific hparam definitions. Each block of code
     # below corresponds to exactly one hparam. Avoid nested conditionals.

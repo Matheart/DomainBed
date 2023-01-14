@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 81, in <module>
+    hparams.update(json.loads(args.hparams))
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)

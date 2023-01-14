@@ -1,0 +1,39 @@
+Environment:
+	Python: 3.9.15
+	PyTorch: 1.7.1
+	Torchvision: 0.8.2
+	CUDA: 10.2
+	CUDNN: 7605
+	NumPy: 1.20.3
+	PIL: 8.3.2
+Args:
+	algorithm: FineTuning
+	checkpoint_freq: None
+	data_dir: ./domainbed/data
+	dataset: PACS
+	holdout_fraction: 0.2
+	hparams: early_stopping_patience=5
+	hparams_seed: 0
+	output_dir: ./domainbed/sweep/output/b7bbc9d0916aa88e8368ae8433155c9f
+	save_model_every_checkpoint: False
+	seed: 675629958
+	skip_model_save: False
+	steps: None
+	task: domain_generalization
+	test_envs: [1]
+	trial_seed: 1
+	uda_holdout_fraction: 0
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 81, in <module>
+    hparams.update(json.loads(args.hparams))
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
