@@ -139,7 +139,7 @@ def _hparams(algorithm, dataset, random_seed):
     elif algorithm == "FineTuning" or algorithm == "LPFT":
         _hparam('early_stopping_patience', 5, lambda r: r.choice([5, 10, 15, 20, 25]))
         _hparam('T_max', 20, lambda r: r.choice([10, 20]))
-        _hparam('lr_d', 0.0001, lambda r: r.choice([0.0001, 0.0003, 0.001, 0.01, 0.03, 0.1]))
+        _hparam('lr_d', 0.00005, lambda r: r.choice([0.0001, 0.0003, 0.001, 0.01, 0.03, 0.1]))
 
 
     # Dataset-and-algorithm-specific hparam definitions. Each block of code
@@ -161,8 +161,10 @@ def _hparams(algorithm, dataset, random_seed):
         _hparam('batch_size', 8, lambda r: 8)
     elif dataset == 'DomainNet':
         _hparam('batch_size', 32, lambda r: int(2**r.uniform(3, 5)))
+    elif algorithm == "FineTuning" or algorithm == "LPFT":
+        _hparam('batch_size', 64, lambda r: 64)
     else:
-        _hparam('batch_size', 32, lambda r: int(2**r.uniform(3, 5.5)))
+        _hparam('batch_size', 32, lambda r: int(2**r.uniform(3, 5)))
 
     if algorithm in ['DANN', 'CDANN'] and dataset in SMALL_IMAGES:
         _hparam('lr_g', 1e-3, lambda r: 10**r.uniform(-4.5, -2.5))

@@ -1,0 +1,20 @@
+/home/Matheart/Code/DomainBed/domainbed/algorithms.py:2001: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  torch.nn.init.xavier_uniform(self.classifier.weight)
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 220, in <module>
+    step_vals = algorithm.update(minibatches_device, uda_device)
+  File "/home/Matheart/Code/DomainBed/domainbed/algorithms.py", line 2029, in update
+    self.optimizer.step()
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/optim/lr_scheduler.py", line 67, in wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/autograd/grad_mode.py", line 26, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/optim/adam.py", line 108, in step
+    F.adam(params_with_grad,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/optim/functional.py", line 94, in adam
+    denom = (exp_avg_sq.sqrt() / math.sqrt(bias_correction2)).add_(eps)
+KeyboardInterrupt

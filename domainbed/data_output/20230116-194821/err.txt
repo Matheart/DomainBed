@@ -1,0 +1,14 @@
+/home/Matheart/Code/DomainBed/domainbed/algorithms.py:2001: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  torch.nn.init.xavier_uniform(self.classifier.weight)
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 179, in <module>
+    algorithm = algorithm_class(dataset.input_shape, dataset.num_classes,
+  File "/home/Matheart/Code/DomainBed/domainbed/algorithms.py", line 2055, in __init__
+    for param in self.model.layer4.parameters():
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/nn/modules/module.py", line 778, in __getattr__
+    raise ModuleAttributeError("'{}' object has no attribute '{}'".format(
+torch.nn.modules.module.ModuleAttributeError: 'ResNet' object has no attribute 'layer4'

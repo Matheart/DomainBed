@@ -1,0 +1,12 @@
+/home/Matheart/Code/DomainBed/domainbed/algorithms.py:2051: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  torch.nn.init.xavier_uniform(self.classifier.weight)
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 220, in <module>
+    step_vals = algorithm.update(minibatches_device, uda_device)
+  File "/home/Matheart/Code/DomainBed/domainbed/algorithms.py", line 2079, in update
+    total_loss += loss.item()
+KeyboardInterrupt

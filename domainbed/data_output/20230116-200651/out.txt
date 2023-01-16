@@ -1,0 +1,67 @@
+Environment:
+	Python: 3.9.15
+	PyTorch: 1.7.1
+	Torchvision: 0.8.2
+	CUDA: 10.2
+	CUDNN: 7605
+	NumPy: 1.20.3
+	PIL: 8.3.2
+Args:
+	algorithm: LPFT
+	checkpoint_freq: None
+	data_dir: ./domainbed/data/
+	dataset: PACS
+	holdout_fraction: 0.2
+	hparams: None
+	hparams_seed: 0
+	output_dir: ./domainbed/data_output/20230116-200651
+	save_model_every_checkpoint: False
+	seed: 0
+	skip_model_save: False
+	steps: None
+	task: domain_generalization
+	test_envs: [0, 1, 3]
+	trial_seed: 0
+	uda_holdout_fraction: 0
+HParams:
+	T_max: 20
+	batch_size: 64
+	class_balanced: False
+	data_augmentation: True
+	early_stopping_patience: 5
+	lr: 5e-05
+	lr_d: 5e-05
+	nonlinear_classifier: False
+	resnet18: False
+	resnet_dropout: 0.0
+	weight_decay: 0.0
+/home/Matheart/Code/DomainBed/domainbed/algorithms.py:2051: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  torch.nn.init.xavier_uniform(self.classifier.weight)
+Validation loss decreased (inf --> 1.779035).  Saving model ...
+env0_in_acc   env0_out_acc  env1_in_acc   env1_out_acc  env2_in_acc   env2_out_acc  env3_in_acc   env3_out_acc  epoch         loss          mem_gb        step          step_time    
+0.3374008542  0.3031784841  0.2110874200  0.2243589744  0.4745508982  0.4311377246  0.0582061069  0.0560509554  0.0000000000  1.7790346146  0.9513945580  0             0.2040507793 
+Validation loss decreased (1.779035 --> 1.365560).  Saving model ...
+Validation loss decreased (1.365560 --> 1.246582).  Saving model ...
+Validation loss decreased (1.246582 --> 0.760911).  Saving model ...
+Validation loss decreased (0.760911 --> 0.662352).  Saving model ...
+Validation loss decreased (0.662352 --> 0.479974).  Saving model ...
+Validation loss decreased (0.479974 --> 0.378249).  Saving model ...
+Validation loss decreased (0.378249 --> 0.273836).  Saving model ...
+Validation loss decreased (0.273836 --> 0.235496).  Saving model ...
+Validation loss decreased (0.235496 --> 0.161089).  Saving model ...
+Validation loss decreased (0.161089 --> 0.147763).  Saving model ...
+Validation loss decreased (0.147763 --> 0.112521).  Saving model ...
+EarlyStopping counter: 1 out of 5
+EarlyStopping counter: 2 out of 5
+EarlyStopping counter: 3 out of 5
+EarlyStopping counter: 4 out of 5
+EarlyStopping counter: 5 out of 5
+Early stopping
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 223, in <module>
+    for key, val in step_vals.items():
+AttributeError: 'int' object has no attribute 'items'

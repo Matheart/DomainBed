@@ -1990,6 +1990,56 @@ class CausIRL_CORAL(AbstractCausIRL):
         super(CausIRL_CORAL, self).__init__(input_shape, num_classes, num_domains,
                                   hparams, gaussian=False)
 
+# https://github.com/Bjarten/early-stopping-pytorch
+class EarlyStopping:
+    """Early stops the training if validation loss doesn't improve after a given patience."""
+    def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt', trace_func=print):
+        """
+        Args:
+            patience (int): How long to wait after last time validation loss improved.
+                            Default: 7
+            verbose (bool): If True, prints a message for each validation loss improvement. 
+                            Default: False
+            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+                            Default: 0
+            path (str): Path for the checkpoint to be saved to.
+                            Default: 'checkpoint.pt'
+            trace_func (function): trace print function.
+                            Default: print            
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.val_loss_min = np.Inf
+        self.delta = delta
+        self.path = path
+        self.trace_func = trace_func
+    def __call__(self, val_loss, model):
+
+        score = -val_loss
+
+        if self.best_score is None:
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+        elif score < self.best_score + self.delta:
+            self.counter += 1
+            self.trace_func(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.save_checkpoint(val_loss, model)
+            self.counter = 0
+
+    def save_checkpoint(self, val_loss, model):
+        '''Saves model when validation loss decrease.'''
+        if self.verbose:
+            self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
+        torch.save(model.state_dict(), self.path)
+        self.val_loss_min = val_loss
+
 # Implemented by Matheart
 class FineTuning(Algorithm):
     def __init__(self, input_shape, num_classes, num_domains, hparams):
@@ -2012,17 +2062,21 @@ class FineTuning(Algorithm):
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = hparams["T_max"])
 
         # Early stopping
-        #self.early_stopping = EarlyStopping(patience=hparams["early_stopping_patience"], metric='val_loss')
+        self.early_stopping = EarlyStopping(patience = hparams["early_stopping_patience"], verbose=True)
 
     def predict(self, x):
         return self.model(x)
     
     def update(self, minibatches, unlabeled=None):
-        self.model.train()
-        for x, y in minibatches:
+        #if self.early_stopping.early_stop:
+        #    print("Early stopping")
+        #    return 0
+        total_loss = 0
+        for i, (x, y) in enumerate(minibatches):
             self.optimizer.zero_grad()
             output = self.predict(x)
             loss = F.cross_entropy(output, y)
+            total_loss += loss.item()
             loss.backward()
             self.optimizer.step()
             self.scheduler.step()
@@ -2030,14 +2084,14 @@ class FineTuning(Algorithm):
             #if self.early_stopping.early_stop:
             #    print("Early stopping")
             #    break
-        return {'loss': loss.item()}
+        
+        #self.early_stopping(total_loss, self.model)            
+        return {'loss': total_loss}
+        
 
-class LPFT(Algorithm):
+class LPFT(FineTuning):
     def __init__(self, input_shape, num_classes, num_domains, hparams):
         super(LPFT, self).__init__(input_shape, num_classes, num_domains, hparams)
-
-        # Load pre-trained ResNet-50
-        self.model = networks.ResNet(input_shape = input_shape, hparams = hparams)
 
         # Linear probing:
         # Freeze all layers except the penultimate layer
@@ -2052,57 +2106,7 @@ class LPFT(Algorithm):
 
         for param in self.model.parameters():
             param.requires_grad = False
-        for param in self.model.layer4.parameters():
+        for param in self.model.network.layer4.parameters():
             param.requires_grad = True
         # we need the gradient to flow through it
-        # self.model.fc.requires_grad = True
-
-        # Logistic regression classifier on frozen feayires
-        self.classifier = nn.Linear(self.model.fc.in_features, num_classes)
-        # where is the argmax ?
-        self.model.fc = self.classifier 
-        self.model.fc.requires_grad = True # such that it can be fine tuned
-
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(
-            self.classifier.parameters(),
-            lr = self.hparams["lr_d"],
-            weight_decay = self.hparams["weight_decay"]
-        )
-    
-    def predict(self, x):
-        with torch.no_grad():
-            logit = self.model(x)
-            output = self.classifier(logit)
-            return output
-    
-    def update(self, minibatches, unlabeled=None):
-        self.model.train()
-        for x, y in minibatches:
-            self.optimizer.zero_grad()
-            logit = self.forward(x)
-            output = self.classifier(logit)
-            loss = self.loss_fn(output, y)
-            loss.backward()
-            self.optimizer.step()
-        return {'loss': loss.item()}
-
-    def fine_tune(self, data_loader, id_domain):
-        # Accuracies of different learning rate
-        best_acc = 0
-        best_lr = 0
-        lrs = [0.5, 0.1, 0.05, 0.01, 0.005, 0.001]
-        accuracy = []
-        for lr in lrs:
-            self.optimizer = torch.optim.Adam(self.classifier.parameters(), lr=lr)
-            scheduler = CosineAnnealingLR(self.optimizer, T_max=len(data_loader))
-            for epoch in range(self.hparams.num_epochs):
-                scheduler.step()
-                train_loss, train_acc = self.train(data_loader, id_domain)
-                accuracy.append(train_acc)
-            avg_acc = sum(accuracy) / len(accuracy)
-            if avg_acc > best_acc:
-                best_acc = avg_acc
-                best_lr = lr
-        self.optimizer = torch.optim.Adam(self.classifier.parameters(), lr=best_lr)
-        return self.test(data_loader, id_domain)
+        self.model.network.fc.requires_grad = True 

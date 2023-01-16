@@ -55,6 +55,10 @@ if __name__ == "__main__":
     start_step = 0
     algorithm_dict = None
 
+    import time
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    args.output_dir += timestr
+
     os.makedirs(args.output_dir, exist_ok=True)
     sys.stdout = misc.Tee(os.path.join(args.output_dir, 'out.txt'))
     sys.stderr = misc.Tee(os.path.join(args.output_dir, 'err.txt'))

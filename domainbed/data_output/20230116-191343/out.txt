@@ -1,0 +1,66 @@
+Environment:
+	Python: 3.9.15
+	PyTorch: 1.7.1
+	Torchvision: 0.8.2
+	CUDA: 10.2
+	CUDNN: 7605
+	NumPy: 1.20.3
+	PIL: 8.3.2
+Args:
+	algorithm: FineTuning
+	checkpoint_freq: None
+	data_dir: ./domainbed/data/
+	dataset: PACS
+	holdout_fraction: 0.2
+	hparams: None
+	hparams_seed: 0
+	output_dir: ./domainbed/data_output/20230116-191343
+	save_model_every_checkpoint: False
+	seed: 0
+	skip_model_save: False
+	steps: None
+	task: domain_generalization
+	test_envs: [1, 2, 3]
+	trial_seed: 0
+	uda_holdout_fraction: 0
+HParams:
+	T_max: 20
+	batch_size: 64
+	class_balanced: False
+	data_augmentation: True
+	early_stopping_patience: 5
+	lr: 5e-05
+	lr_d: 0.0001
+	nonlinear_classifier: False
+	resnet18: False
+	resnet_dropout: 0.0
+	weight_decay: 0.0
+/home/Matheart/Code/DomainBed/domainbed/algorithms.py:2001: UserWarning: nn.init.xavier_uniform is now deprecated in favor of nn.init.xavier_uniform_.
+  torch.nn.init.xavier_uniform(self.classifier.weight)
+env0_in_acc   env0_out_acc  env1_in_acc   env1_out_acc  env2_in_acc   env2_out_acc  env3_in_acc   env3_out_acc  epoch         loss          mem_gb        step          step_time    
+0.2318486882  0.2102689487  0.1924307036  0.1773504274  0.3675149701  0.4041916168  0.2299618321  0.2242038217  0.0000000000  2.0636632442  5.2802982330  0             0.2769589424 
+0.9688834655  0.9144254279  0.5831556503  0.5790598291  0.9580838323  0.9251497006  0.5811068702  0.5859872611  14.371257485  0.2872105075  5.5586423874  300           0.2522388784 
+0.9707138499  0.9144254279  0.6652452026  0.6623931624  0.9041916168  0.9041916168  0.5543893130  0.5643312102  28.742514970  0.0566077582  5.5586423874  600           0.2574573270 
+0.9853569250  0.9217603912  0.6103411514  0.6410256410  0.9603293413  0.9131736527  0.4923664122  0.4828025478  43.113772455  0.0716041768  5.5586423874  900           0.2593964950 
+0.9981696156  0.9413202934  0.6497867804  0.6623931624  0.9468562874  0.9191616766  0.5801526718  0.5834394904  57.485029940  0.0231142492  5.5586423874  1200          0.2600474302 
+0.9993898719  0.9388753056  0.6679104478  0.7072649573  0.9625748503  0.9281437126  0.6284987277  0.6305732484  71.856287425  0.0294646826  5.5586423874  1500          0.2604419716 
+0.9902379500  0.9388753056  0.6231343284  0.6559829060  0.9401197605  0.8922155689  0.5493002545  0.5490445860  86.227544910  0.0200184151  5.5586423874  1800          0.2606094209 
+0.9902379500  0.9168704156  0.6807036247  0.7072649573  0.9341317365  0.9011976048  0.5693384224  0.5656050955  100.59880239  0.0130308329  5.5586423874  2100          0.2605887151 
+Traceback (most recent call last):
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/Matheart/Code/DomainBed/domainbed/scripts/train.py", line 220, in <module>
+    step_vals = algorithm.update(minibatches_device, uda_device)
+  File "/home/Matheart/Code/DomainBed/domainbed/algorithms.py", line 2029, in update
+    self.optimizer.step()
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/optim/lr_scheduler.py", line 67, in wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/autograd/grad_mode.py", line 26, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/optim/adam.py", line 108, in step
+    F.adam(params_with_grad,
+  File "/home/Matheart/miniconda3/envs/statml/lib/python3.9/site-packages/torch/optim/functional.py", line 94, in adam
+    denom = (exp_avg_sq.sqrt() / math.sqrt(bias_correction2)).add_(eps)
+KeyboardInterrupt
