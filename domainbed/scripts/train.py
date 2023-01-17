@@ -55,7 +55,6 @@ if __name__ == "__main__":
     start_step = 0
     algorithm_dict = None
 
-    import time
     timestr = time.strftime("%Y%m%d-%H%M%S")
     args.output_dir += timestr
 

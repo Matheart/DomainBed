@@ -2054,7 +2054,7 @@ class FineTuning(Algorithm):
 
         self.optimizer = torch.optim.Adam(
             self.model.parameters(),
-            lr = self.hparams["lr_d"],
+            lr = self.hparams["lr"],
             weight_decay = self.hparams["weight_decay"]
         )    
 

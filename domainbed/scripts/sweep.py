@@ -59,6 +59,7 @@ class Job:
         job_info = (self.train_args['dataset'],
             self.train_args['algorithm'],
             self.train_args['test_envs'],
+            json.loads(self.train_args['hparams'])['lr'],
             self.train_args['hparams_seed'])
         return '{}: {} {}'.format(
             self.state,
@@ -96,12 +97,20 @@ def all_test_env_combinations(n):
             yield [i, j]
 
 def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparams, steps,
-    data_dir, task, holdout_fraction, single_test_envs, hparams):
+    data_dir, task, holdout_fraction, single_test_envs, test_envs, hparams):
     args_list = []
+
+    Pass_LR_as_list = False
+    hparams_dict = json.loads(hparams)
+    if isinstance(hparams_dict['lr'], list):
+        Pass_LR_as_list = True
+    
     for trial_seed in range(n_trials):
         for dataset in dataset_names:
             for algorithm in algorithms:
-                if single_test_envs:
+                if test_envs != None: # self_defined test environment
+                    all_test_envs = [test_envs]
+                elif single_test_envs:
                     all_test_envs = [
                         [i] for i in range(datasets.num_environments(dataset))]
                 else:
@@ -122,9 +131,19 @@ def make_args_list(n_trials, dataset_names, algorithms, n_hparams_from, n_hparam
                             algorithm, test_envs, hparams_seed, trial_seed)
                         if steps is not None:
                             train_args['steps'] = steps
+
                         if hparams is not None:
-                            train_args['hparams'] = hparams
-                        args_list.append(train_args)
+                            if Pass_LR_as_list:
+                                hparams_dict_new = copy.deepcopy(hparams_dict)
+                                for lr in hparams_dict['lr']:
+                                    hparams_dict_new['lr'] = lr
+                                    train_args['hparams'] = json.dumps(hparams_dict_new)
+                                    args_list.append(copy.deepcopy(train_args))
+                            else:
+                                train_args['hparams'] = hparams
+                        
+                        if not Pass_LR_as_list:
+                            args_list.append(train_args)
     return args_list
 
 def ask_for_confirmation():
@@ -153,6 +172,10 @@ if __name__ == "__main__":
     parser.add_argument('--holdout_fraction', type=float, default=0.2)
     parser.add_argument('--single_test_envs', action='store_true')
     parser.add_argument('--skip_confirmation', action='store_true')
+    # self-defined arguments
+    #parser.add_argument('--custom_test_envs', type = bool, default = False)
+    parser.add_argument('--test_envs', type=int, nargs='+', default=None)
+
     args = parser.parse_args()
 
     args_list = make_args_list(
@@ -166,8 +189,13 @@ if __name__ == "__main__":
         task=args.task,
         holdout_fraction=args.holdout_fraction,
         single_test_envs=args.single_test_envs,
+        #custom_test_envs=args.custom_test_envs,
+        test_envs=args.test_envs,
         hparams=args.hparams
     )
+
+    timestr = time.strftime("/%Y%m%d-%H%M%S")
+    args.output_dir += timestr
 
     jobs = [Job(train_args, args.output_dir) for train_args in args_list]
 
